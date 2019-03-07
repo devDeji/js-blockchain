@@ -14,7 +14,10 @@ const socketListeners = require('./socketListeners');
 //const  PORT = 3000;
 
 const PORT = process.env.PORT || 3001;
+<<<<<<< HEAD
 const senderWallet = new wallet();
+=======
+>>>>>>> bfcb09f68107b0104e4cc5eabc966e5c16103153
 
 const blockChain = new BlockChain(null, io);
 const block = new Block(0, 1, 0, []);
