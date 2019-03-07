@@ -15,7 +15,12 @@ class Blockchain {
   addNode(node) {
     this.nodes.push(node);
   }
-
+  getNodes(){
+  return this.nodes;
+  }
+getCurrTrans(){
+ return this.currentTransactions;
+}
   mineBlock(block) {
     this.blocks.push(block);
     console.log('Mined Successfully');
