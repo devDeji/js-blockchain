@@ -4,10 +4,11 @@ const Transaction = require('./models/transaction');
 const Blockchain = require('./models/chain');
 
 const socketListeners = (socket, chain) => {
-  socket.on(SocketActions.ADD_TRANSACTION, (sender, receiver, amount) => {
-    const transaction = new Transaction(sender, receiver, amount);
-    chain.newTransaction(transaction);
-    console.info(`Added transaction: ${JSON.stringify(transaction.getDetails(), null, '\t')}`);
+  socket.on(SocketActions.ADD_TRANSACTION, (sender, receiver, amount, senderWallet) => {
+   console.log('Broadcasting new transaction to nodes sender pk: '+senderWallet.publicKey);
+   const transaction = new Transaction(sender, receiver, amount);
+      chain.newTransaction(senderWallet, transaction, receiver, amount);
+	  
   });
 
   socket.on(SocketActions.END_MINING, (newChain) => {

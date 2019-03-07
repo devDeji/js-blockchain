@@ -1,6 +1,8 @@
 const Block = require('./block');
 
 const actions = require('../constants');
+const transaction = require('./transaction');
+
 
 const { generateProof, isProofValid } = require('../utils/proof');
 
@@ -15,16 +17,29 @@ class Blockchain {
   addNode(node) {
     this.nodes.push(node);
   }
-
+  getNodes(){
+  return this.nodes;
+  }
+getCurrTrans(){
+ return this.currentTransactions;
+}
   mineBlock(block) {
     this.blocks.push(block);
     console.log('Mined Successfully');
     this.io.emit(actions.END_MINING, this.toArray());
   }
 
-  async newTransaction(transaction) {
-    this.currentTransactions.push(transaction);
-    if (this.currentTransactions.length === 2) {
+  async newTransaction(senderWallet, trans, receiver, amount) {
+   // this.currentTransactions.push(trans);
+    let verifyTransaction = transaction.newTransaction(senderWallet, trans, receiver, amount);
+	  if(!verifyTransaction){
+		  console.log('Transaction failed');
+		  return verifyTransaction;
+	  }
+	  this.currentTransactions.push(verifyTransaction);
+	  console.log('verifyTransaction: '+verifyTransaction);
+    if (this.currentTransactions.length === 2 && verifyTransaction) {
+      console.info(`Added transaction: ${JSON.stringify(trans.getDetails(), null, '\t')}`);
       console.info('Starting mining block...');
       const previousBlock = this.lastBlock();
       process.env.BREAK = false;
