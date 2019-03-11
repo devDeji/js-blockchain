@@ -9,6 +9,7 @@ class Transaction {
     this.timestamp = Date.now();
     this.id = ChainUtil.id();
     this.input = null;
+    this.minerId = 0;                                          this.mined = false;                                        this.rewarded = false;
     this.outputs = [];
   }
 

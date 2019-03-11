@@ -30,5 +30,17 @@ class Wallet{
 	    console.log('sign data: '+dat);
 	    return ChainUtil.genKeyPair().sign(dat);
    }
+  static deposit(amount){
+      this.balance = this.balance + amount;
+	  return this.balance;
+  }
+  static withdraw(amount){
+	  if(this.balance < amount){
+		  return false
+	  } else{
+                  this.balance = this.balance - amount;
+		  return this.balance;
+	  }
+  }
 }
 module.exports = Wallet;

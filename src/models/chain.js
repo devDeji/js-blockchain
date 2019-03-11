@@ -37,7 +37,7 @@ getCurrTrans(){
 		  return verifyTransaction;
 	  }
 	  this.currentTransactions.push(verifyTransaction);
-	  console.log('verifyTransaction: '+verifyTransaction);
+	  console.log('verifyTransaction: '+verifyTransaction.id);
     if (this.currentTransactions.length === 2 && verifyTransaction) {
       console.info(`Added transaction: ${JSON.stringify(trans.getDetails(), null, '\t')}`);
       console.info('Starting mining block...');
