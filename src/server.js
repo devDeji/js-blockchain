@@ -91,7 +91,7 @@ app.get('/currentTransactions', (req, res) => {
 });
 
 //get public key
-app.get('/public-key', (req, res)=> {
+app.get('/address', (req, res)=> {
 	res.json({
 		publicKey: senderWallet.publicKey
 	});
@@ -99,6 +99,7 @@ app.get('/public-key', (req, res)=> {
 
 //get wallet balance
 app.get('/balance', (req, res)=> {
+	let { addr }= req.query;
         res.json({
                Wallet_balance: senderWallet.balance                  });
 });

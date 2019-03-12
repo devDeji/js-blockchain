@@ -1,6 +1,7 @@
 const EC = require('elliptic').ec;
 const ec = new EC('secp256k1');
 const uuidV1 = require('uuid/v1');
+const Wallet = require('./wallet');
 const createHash = require("crypto").createHash;
 
 //secp256k1 is the algorithm to generate key pair
@@ -17,7 +18,7 @@ class ChainUtil{
         return uuid1;
 }
 static hash(data){  	
-        let dataString = JSON.stringify(data).toString();
+        let dataString = JSON.stringify(Wallet.toString(data));
 	let sha256 = createHash("sha256").update(dataString).digest();
 console.log('sha256'+sha256);
 	return sha256;

@@ -15,7 +15,8 @@ const socketListeners = (socket, chain) => {
 	  let  txnPoolIns = TransactionPool.addTransaction(transaction, transactionPl);
  let txnPoolTxn = txnPoolIns.transactions;
 	  console.log('Tranpool: length'+ txnPoolTxn.length);
-	  for (let i = 0; i < txnPoolTxn.length; i++){
+	  //Initial trans pool entry[0] is empty check server.js
+	  for (let i = 1; i < txnPoolTxn.length; i++){
               console.log('Cycling thru trans pool: '+txnPoolTxn[i].id);
        let currTxn = txnPoolTxn[i];
 		if(!currTxn.mined){

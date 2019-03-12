@@ -6,11 +6,10 @@ class Transaction {
     this.sender = sender;
     this.receiver = receiver;
     this.amount = amount;
+    this.outputs = [];
     this.timestamp = Date.now();
     this.id = ChainUtil.id();
     this.input = null;
-    this.minerId = 0;                                          this.mined = false;                                        this.rewarded = false;
-    this.outputs = [];
   }
 
 	/**
@@ -43,12 +42,21 @@ class Transaction {
             console.log('tran.js Amount exceeds the balance');
             return false;  
 	}
-
+	    console.log('transaction outp bfore: '+transaction.outputs);
+	    if(transaction.outputs == '' || transaction.outputs == undefined){
+		  transaction.outputs = [];
+	  }
+       console.log('transaction outp aft: '+transaction.outputs);
        transaction.outputs.push(...[
-            {amount: senderWallet.balance -amount,address:
-             senderWallet.publicKey},
+           {amount: senderWallet.balance -amount,address:
+            senderWallet.publicKey},
             {amount: amount,address: recipient}
         ]);
+       //transaction.outputs.push(...[
+         //  {amount: senderWallet.balance -amount,address:
+           // senderWallet.publicKey},
+           // {amount: amount,address: recipient}
+       // ]);
       Transaction.signTransaction(transaction,senderWallet);
 
       return transaction;

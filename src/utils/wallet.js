@@ -10,6 +10,7 @@ class Wallet{
     constructor(){
         this.balance = INITIAL_BALANCE;
         this.keyPair = ChainUtil.genKeyPair();
+	    //usually the address
         this.publicKey = this.keyPair.getPublic().encode('hex');
     }
     toSign(data){
@@ -19,7 +20,7 @@ class Wallet{
 	console.log('signed:'+signed);
 	return signed;
 }
-    toString(data){
+ static toString(data){
        return data;
        return `Wallet - 
         publicKey: ${this.publicKey.toString()}
@@ -30,16 +31,18 @@ class Wallet{
 	    console.log('sign data: '+dat);
 	    return ChainUtil.genKeyPair().sign(dat);
    }
-  static deposit(amount){
-      this.balance = this.balance + amount;
-	  return this.balance;
+  static deposit(amount, wallet){
+          wallet.balance = wallet.balance + amount;
+	  return wallet;
   }
-  static withdraw(amount){
-	  if(this.balance < amount){
+ static  withdraw(amount, senderWallet){
+	 console.log('senderWallet addr '+ senderWallet.publicKey);
+	  if(senderWallet.balance < amount){
 		  return false
 	  } else{
-                  this.balance = this.balance - amount;
-		  return this.balance;
+                  senderWallet.balance = senderWallet.balance - amount;
+		  console.log('SenderWallet bal: '+senderWallet.balance);
+		  return senderWallet;
 	  }
   }
 }

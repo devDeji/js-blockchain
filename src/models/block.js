@@ -9,6 +9,9 @@ class Block {
     this.previousBlockHash = previousBlockHash;
     this.transactions = transactions;
     this.timestamp = Date.now();
+    this.minerId = 0; 
+    this.mined = false;     
+    this.rewarded = false;
   }
 
   hashValue() {
