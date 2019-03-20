@@ -11,7 +11,7 @@ const BlockChain = require('./models/chain');
 const transactionPl = require('./models/transactionPool');
 const Block = require('./models/block');
 const SocketActions  = require('./constants');
-
+const acui_main = require('./utils/acui_main');
 const socketListeners = require('./socketListeners');
 
 //const  PORT = 3000;
@@ -60,6 +60,17 @@ app.post('/transaction', (req, res) => {                     const { sender, rec
 //called after the post /transaction call to newTransaction 
 app.get('/chain', (req, res) => {
   res.json(blockChain.toArray()).end();
+});
+
+app.post('/addressbook', (req, res) => {  
+        const {  params }  = req.body;
+	acui_main.loadAddressBook(params).then((result) => {
+		console.log('result: '+ result);
+                res.json(result).end();
+            }).catch((err) => {
+		console.log('err: '+ err);
+                return reject(err);
+            });
 });
 
 app.get('/', (req, res) => {
