@@ -43,23 +43,39 @@ var WalletShellSession = function (opts) {
 //storage = window.localStorage;
 
     // initialize
-  // if (!storage.getItem(this.sessKey)) {  storage.setItem(this.sessKey, JSON.stringify({ ...this.sessDefault, ...this.stickyVals }));
+ // if (!sessionStorage.getItem(this.sessKey)) {  sessionStorage.setItem(this.sessKey, JSON.stringify({ ...this.sessDefault, ...this.stickyVals }));
     /* jshint ignore:end */
 };
 
+ WalletShellSession.prototype.init = function () {
+	// initialize  
+	if (!sessionStorage.getItem(this.sessKey)) {  sessionStorage.setItem(this.sessKey, JSON.stringify({ ...this.sessDefault, ...this.stickyVals }));                                                                    /* jshint ignore:end */
+}
+}
 WalletShellSession.prototype.get = function (key) {
+    // initialize 
+    console.log('Emer outbreak:'+key);
+	try{
+    if (!window.sessionStorage.getItem(this.sessKey)) { 
+	    console.log('cat cut ur tongue: '+ this.sessKey);
+	    window.sessionStorage.setItem(this.sessKey, JSON.stringify({ ...this.sessDefault, ...this.stickyVals 
+       }));
+    }
+	} catch (err){
+	 console.log('Caught: '+ err);
+	}
     key = key || false;
     if (!key) {
-       // return JSON.parse(sessionStorage.getItem(this.sessKey)) || this.sessDefault;
+       return JSON.parse(sessionStorage.getItem(this.sessKey)) || this.sessDefault;
 	return '';
     }
 
     if (!this.keys.includes(key)) {
         throw new Error(`Invalid session key: ${key}`);
     }
-
-    //return JSON.parse(sessionStorage.getItem(this.sessKey))[key];
-    return '';
+    let sessRes = JSON.parse(sessionStorage.getItem(this.sessKey))[key]; 
+    console.log('Get session val: :'+ sessRes);
+    return sessRes;
 };
 
 WalletShellSession.prototype.getDefault = function (key) {
@@ -70,14 +86,16 @@ WalletShellSession.prototype.getDefault = function (key) {
 };
 
 WalletShellSession.prototype.set = function (key, val) {
+    console.log('did it get here first!: '+ val);
     if (!this.keys.includes(key)) {
         throw new Error(`Invalid session key: ${key}`);
     }
 
     let sessData = this.get(); // all current data obj
     sessData[key] = val; // update value
-   // return sessionStorage.setItem(this.sessKey, JSON.stringify(sessData));
-	return '';
+    let sessDa = JSON.stringify(sessData);
+    console.log('Got here!: '+ sessDa);
+   return sessionStorage.setItem(this.sessKey, sessDa);
 };
 
 WalletShellSession.prototype.reset = function (key) {
@@ -90,7 +108,7 @@ WalletShellSession.prototype.reset = function (key) {
         sessData[key] = this.sessDefault[key]; // set to default value
         return sessionStorage.setItem(this.sessKey, JSON.stringify(sessData[key]));
     }
-    //return sessionStorage.setItem(this.sessKey, JSON.stringify(this.sessDefault));
+    return sessionStorage.setItem(this.sessKey, JSON.stringify(this.sessDefault));
     let stickyData = {};
     Object.keys(this.stickyVals).forEach((e) => {
         stickyData[e] = this.get(e);

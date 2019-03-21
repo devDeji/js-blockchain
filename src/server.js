@@ -69,8 +69,23 @@ app.post('/addressbook', (req, res) => {
                 res.json(result).end();
             }).catch((err) => {
 		console.log('err: '+ err);
+                res.json(err).end();
+            });
+});
+
+app.post('/createwallet', (req, res) => {
+        const {  params }  = req.body;    
+	let newWallet = new wallet(params);
+	wallet.finalizeWalletCreate(newWallet).then((res) => {
+	acui_main.handleWalletCreate(res).then((result) => {                          console.log('Wallet create result: '+ result);                                      res.json('Wallet created: '+ result).end();
+            }).catch((err) => {
+                console.log('err: '+ err);
                 return reject(err);
             });
+	}).catch((err) => {
+		res.json('Error creating wallet: '+err);
+	});
+
 });
 
 app.get('/', (req, res) => {

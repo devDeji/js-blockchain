@@ -16,7 +16,8 @@ const syncStatus = require('./ac_constants').syncStatus;
 //const sessConfig = { debug: remote.app.debug, walletConfig: remote.app.walletConfig };
 const wsession = new WalletShellSession();
 
-const SERVICE_LOG_DEBUG = wsession.get('debug');
+//const SERVICE_LOG_DEBUG = wsession.get('debug');
+const SERVICE_LOG_DEBUG = true;
 const SERVICE_LOG_LEVEL_DEFAULT = 0;
 const SERVICE_LOG_LEVEL_DEBUG = 5;
 const SERVICE_LOG_LEVEL = (SERVICE_LOG_DEBUG ? SERVICE_LOG_LEVEL_DEBUG : SERVICE_LOG_LEVEL_DEFAULT);
@@ -518,15 +519,15 @@ WalletShellManager.prototype.createWallet = function (walletFile, password) {
         let serviceArgs = wsm.serviceArgsDefault.concat(
             [
                 '-g', '-w', walletFile, '-p', password,
-                '--log-level', 0, '--log-file', path.join(remote.app.getPath('temp'), 'ts.log')
+                '--log-level', 0, '--log-file', path.join(__dirname, 'ts.log')
             ]
         );
         childProcess.execFile(
             wsm.serviceBin, serviceArgs, (error, stdout, stderr) => {
-                if (stdout) log.debug(stdout);
-                if (stderr) log.debug(stderr);
+                if (stdout) log.debug('err4: '+stdout);
+                if (stderr) log.debug('err5: '+stderr);
                 if (error) {
-                    log.error(`Failed to create wallet: ${error.message}`);
+                    log.error(`Failed to create wallet3: ${error.message}`);
                     return reject(new Error(ERROR_WALLET_CREATE));
                 } else {
                     if (!wsutil.isRegularFileAndWritable(walletFile)) {

@@ -23,6 +23,7 @@ const WalletShellAddressbook = require('./ac_addressbook');
 //const ADDRESS_BOOK_DIR = remote.app.path('userData');
 const ADDRESS_BOOK_DIR = __dirname + '/userData';
 const ADDRESS_BOOK_DEFAULT_PATH = path.join(ADDRESS_BOOK_DIR, '/SharedAddressBook.json');
+const WALLET_DEFAULT_PATH = path.join(ADDRESS_BOOK_DIR, '/wallet.twl');
 let addressBook = new WalletShellAddressbook(ADDRESS_BOOK_DEFAULT_PATH);
 
 //const DEFAULT_WALLET_PATH = remote.app.getPath('documents');
@@ -134,26 +135,26 @@ static createNewAddress(name, pass){
         loadAddressBook({ path: addrPath, name: name, pass: pass });
         }
 
-static  addAddressBook(){
+static  addAddressBookEntry(name, address, paymentId, isUpdate){
     // insert address book entry
-  let nameValue = addressBookInputName.value ? addressBookInputName.value.trim() : '';
-        let addressValue = addressBookInputWallet.value ? addressBookInputWallet.value.trim() : '';
-        let paymentIdValue = addressBookInputPaymentId.value ? addressBookInputPaymentId.value.trim() : '';
-        let isUpdate = addressBookInputUpdate.value ? addressBookInputUpdate.value : 0;
+  let nameValue = name;
+        let addressValue = address;
+        let paymentIdValue = paymentId;
+        let isUpdate = isUpdate;
 
         if (!nameValue || !addressValue) {
-            formMessageSet('addressbook', 'error', "Name and wallet address can not be left empty!");
+            console.log('Name and wallet cannot be empty!');
             return;
         }
 
         if (!wsutil.validateAddress(addressValue)) {
-            formMessageSet('addressbook', 'error', `Invalid ${config.assetName} address`);
+            console.log('Invalid ${config.assetName} address');
             return;
         }
 
         if (paymentIdValue.length) {
             if (!wsutil.validatePaymentId(paymentIdValue)) {
-                formMessageSet('addressbook', 'error', "Invalid Payment ID");
+                console.log("Invalid Payment ID");
                 return;
             }
         }
@@ -190,20 +191,10 @@ static  addAddressBook(){
         wsession.set('addressBook', abook);
         let rowData = Object.entries(abook.data).map(([key, value]) => ({ key, value }));
 
-        wsutil.showToast('Address book entry have been saved.');
-        changeSection('section-addressbook');
-
-        // reset
-        addressBookInputName.value = '';
-        addressBookInputName.dataset.oldhash = '';
-        addressBookInputWallet.value = '';
-        addressBookInputPaymentId.value = '';
-        addressBookInputUpdate.value = 0;
-        formMessageReset();
+        console.log('Address book entry has been saved!');
 
         setTimeout(() => {
             addressBook.save(abook);
-            initAddressCompletion(abook.data);
         }, 500);
     };
 
@@ -212,8 +203,9 @@ static  loadAddressBook(params) {
         params = params || false;
         wsession.set('addressBookErr', false);
         if (params) {
+	   console.log('Addresz tho params: '+params);
             // new address book, reset ab object + session
-            wsession.set('addressBook', null);
+           wsession.set('addressBook', null);
             if (params.name === 'default') {
                 addressBook = new WalletShellAddressbook(ADDRESS_BOOK_DEFAULT_PATH);
             } else {
@@ -229,7 +221,7 @@ static  loadAddressBook(params) {
                 addressBook.load()
                     .then((addressData) => {
 			console.log('addrData: '+addressData);
-                        wsession.set('addressBook', addressData);
+                       wsession.set('addressBook', addressData);
 			    return resolve(addressData);
 	});
     setTimeout(() => {
@@ -307,15 +299,15 @@ static handleWalletClose() {
         });
 }
 
-static handleWalletCreate() {
-        let filePathValue = walletCreateInputPath.value ? walletCreateInputPath.value.trim() : '';
-        let passwordValue = walletCreateInputPassword.value ? walletCreateInputPassword.value.trim() : '';
+static handleWalletCreate(params) {
+        let filePathValue = params || WALLET_DEFAULT_PATH;
+        let passwordValue = 'pass';
 
         // validate path
         wsutil.validateWalletPath(filePathValue, DEFAULT_WALLET_PATH).then((finalPath) => {
             // validate passwod
             if (!passwordValue.length) {
-                formMessageSet('create', 'error', `Please enter a password, creating wallet without a password will not be supported!`);
+        console.log('create', 'error', `Please enter a password, creating wallet without a password will not be supported!`);
                 return;
             }
 
@@ -328,7 +320,7 @@ static handleWalletCreate() {
                     fs.renameSync(finalPath, backfn);
                     //fs.unlinkSync(finalPath);
                 } catch (err) {
-                    formMessageSet('create', 'error', `Unable to overwrite existing file, please enter new wallet file path`);
+                    console.log('create error unable to overwrite existing file, please enter new wallet file path');
                     return;
                 }
             }
@@ -339,13 +331,14 @@ static handleWalletCreate() {
                 passwordValue
             ).then((walletFile) => {
                 console.log('wallet created: '+ walletFile);
-                walletOpenInputPath.value = walletFile;
+                //walletOpenInputPath.value = walletFile;
+		return walletFile;
             }).catch((err) => {
-                formMessageSet('create', 'error', err.message);
+                console.log('create 1', 'error', err.message);
                 return;
             });
         }).catch((err) => {
-            formMessageSet('create', 'error', err.message);
+            console.log('create 2', 'error', err.message);
             return;
         });
 }
