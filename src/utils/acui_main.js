@@ -22,8 +22,9 @@ const WalletShellAddressbook = require('./ac_addressbook');
 
 //const ADDRESS_BOOK_DIR = remote.app.path('userData');
 const ADDRESS_BOOK_DIR = __dirname + '/userData';
+const WALLET_DIR = __dirname + '/wallets';
 const ADDRESS_BOOK_DEFAULT_PATH = path.join(ADDRESS_BOOK_DIR, '/SharedAddressBook.json');
-const WALLET_DEFAULT_PATH = path.join(ADDRESS_BOOK_DIR, '/wallet.twl');
+const WALLET_DEFAULT_PATH = path.join(WALLET_DIR, '/wallet.twl');
 let addressBook = new WalletShellAddressbook(ADDRESS_BOOK_DEFAULT_PATH);
 
 //const DEFAULT_WALLET_PATH = remote.app.getPath('documents');
@@ -49,6 +50,7 @@ class acui_main{
     ret = ret || false;
 
     let payId = require('crypto').randomBytes(32).toString('hex');
+    console.log('payId: '+payId);
     if (ret) return payId.toUpperCase();
 }
 
@@ -136,76 +138,82 @@ static createNewAddress(name, pass){
         }
 
 static  addAddressBookEntry(name, address, paymentId, isUpdate){
-    // insert address book entry
-  let nameValue = name;
+    return new Promise((resolve, reject) => {
+	// insert address book entry
+        let nameValue = name;
         let addressValue = address;
         let paymentIdValue = paymentId;
-        let isUpdate = isUpdate;
-
+       // let isUpd = isUpd;
+        console.log('Started add book entry: '+ nameValue);
         if (!nameValue || !addressValue) {
             console.log('Name and wallet cannot be empty!');
             return;
         }
-
+        console.log('Validating add: '+addressValue);
         if (!wsutil.validateAddress(addressValue)) {
             console.log('Invalid ${config.assetName} address');
             return;
         }
-
         if (paymentIdValue.length) {
             if (!wsutil.validatePaymentId(paymentIdValue)) {
                 console.log("Invalid Payment ID");
                 return;
             }
         }
-
-        if (addressValue.length > config.addressLength) paymentIdValue.value = '';
-
+        console.log('config addrlen: '+config.addressLength);
+	console.log('addVal len: '+ addressValue.length);
+        //if (addressValue.length > config.addressLength) paymentIdValue.value = '';
         let entryName = nameValue.trim();
         let entryAddr = addressValue.trim();
         let entryPaymentId = paymentIdValue.trim();
-        let entryHash = wsutil.fnvhash(entryAddr + entryPaymentId);
-
-        let abook = wsession.get('addressBook');
-        let addressBookData = abook.data;
-        if (addressBookData.hasOwnProperty(entryHash) && !isUpdate) {
-            formMessageSet('addressbook', 'error', "This combination of address and payment ID already exist, please enter new address or different payment id.");
-            return;
-        }
-
-        let newAddress = {
-            name: entryName,
-            address: entryAddr,
-            paymentId: entryPaymentId,
-            qrCode: wsutil.genQrDataUrl(entryAddr)
-        };
-        abook.data[entryHash] = newAddress;
-
-        // update but address+payid is new
-        let oldHash = addressBookInputName.dataset.oldhash || '';
-        let isNew = (oldHash.length && oldHash !== entryHash);
-
-        if (isUpdate && isNew) {
-            delete abook.data[oldHash];
-        }
-        wsession.set('addressBook', abook);
+        let ahash = wsutil.fnvhash(entryAddr + entryPaymentId);
+        console.log('new ahash: '+ ahash);
+        //let abook = wsession.get('addressBook');
+	addressBook.load().then((abook) => {
+        console.log('Add book:'+abook.name);
+        let walletExists = false;          
+	abook.forEach((item) => {
+	 let addressBookData = item[ahash];    
+	 console.log('addBookData:'+addressBookData);
+	 if (addressBookData == ahash && isUpdate) {             
+		 let walletExists = true;                                            // abook.data[i].remove();                             
+	          let item = {                                                        name: entryName,                                                      address: entryAddr,                                                   paymentId: entryPaymentId,                                            qrCode: wsutil.genQrDataUrl(entryAddr),           
+		};                         
+	let ahash = wsutil.fnvhash(item.address + item.paymentId);            let aqr = wsutil.genQrDataUrl(item.address);                          item.qrCode = aqr;                                                    abook[ahash] = item;                                  
+	 } else {                                                                    let newAddress = {                                                        name: entryName,                                                      address: entryAddr,                                                   paymentId: entryPaymentId,                                            qrCode: wsutil.genQrDataUrl(entryAddr),               
+	};                                                                    
+	let ahash = wsutil.fnvhash(item.address + item.paymentId);            let aqr = wsutil.genQrDataUrl(item.address);                          item.qrCode = aqr;                                                    abook[ahash] = item;
+	}                                                                    });                                                                   //wsession.set('addressBook', abook);      
+       console.log('New addbook entry: '+ abk[ahash]);                         let abData = {                                                            name: this.name,                                                      data: abook,        
+       };                                                                    this.save(abData).then(function () {                                      console.log('abData: '+ abData.data);                                 console.log('Add book data: '+abData.name);                           return resolve(abData);                                           }); 
+	
         let rowData = Object.entries(abook.data).map(([key, value]) => ({ key, value }));
-
-        console.log('Address book entry has been saved!');
-
+  console.log('Address book entry has been saved!' + rowData.name);
+	}).catch((err) => {
+	   console.log('err'+ err);
+	   let abook = addressBook.create();
+	   let newAddress = {                                                        name: entryName,                                                      address: entryAddr,                                                   paymentId: entryPaymentId,                                            qrCode: wsutil.genQrDataUrl(entryAddr),                               //entryHash: wsutil.fnvhash(entryAddr + entryPaymentId)
+	   };                                                                    abook[ahash] = newAddress;
+	  //wsession.set('addressBook', abook);    
+	console.log('New addbook entry: '+ abook[ahash].name);    
+	console.log('New addbook payId: '+ abook[ahash].paymentId);	
+	let abData = {                                                            name: this.name,                                                      data: abook,
+	};                                                                    addressBook.save(abData).then(function () {                                      console.log('abData: '+ abData.data);                                 console.log('Add book data: '+abData.name);                           return resolve(abData);                                           });
+	});
         setTimeout(() => {
-            addressBook.save(abook);
+           // addressBook.save(abook);
         }, 500);
+      });
     };
 
 static  loadAddressBook(params) {
         return new Promise((resolve, reject) => {                               console.log('Path: '+ADDRESS_BOOK_DEFAULT_PATH);                            
         params = params || false;
-        wsession.set('addressBookErr', false);
+       // wsession.set('addressBookErr', false);
         if (params) {
 	   console.log('Addresz tho params: '+params);
             // new address book, reset ab object + session
-           wsession.set('addressBook', null);
+          // wsession.set('addressBook', null);
             if (params.name === 'default') {
                 addressBook = new WalletShellAddressbook(ADDRESS_BOOK_DEFAULT_PATH);
             } else {
@@ -300,7 +308,10 @@ static handleWalletClose() {
 }
 
 static handleWalletCreate(params) {
-        let filePathValue = params || WALLET_DEFAULT_PATH;
+	console.log('Creating ch pro for wallet: '+params);
+	let pth = path.join(WALLET_DIR, '/'+params+'.twl');
+	console.log('wallet at path: '+pth);
+        let filePathValue = pth || WALLET_DEFAULT_PATH;
         let passwordValue = 'pass';
 
         // validate path
@@ -317,7 +328,8 @@ static handleWalletCreate(params) {
                     // for now, backup instead of delete
                     let ts = new Date().getTime();
                     let backfn = `${finalPath}.bak.${ts}`;
-                    fs.renameSync(finalPath, backfn);
+		    console.log('backfn: '+backfn);
+                    //fs.renameSync(finalPath, backfn);
                     //fs.unlinkSync(finalPath);
                 } catch (err) {
                     console.log('create error unable to overwrite existing file, please enter new wallet file path');

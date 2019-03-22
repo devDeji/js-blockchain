@@ -32,10 +32,10 @@ static finalizeWalletCreate(wallet){
 	return new Promise((resolve, reject) => {
 	console.log('wallet: '+ wallet.name);
 	this.toFile(wallet).then((res) => {
-	 console.log('Wallet to add book: '+ res.publicKey);
-          this.toAddressBook(res.publicKey).then((resp) => {
-	     console.log('Added wallet to address book: '+ resp);
-		  return resolve(res);
+	 console.log('Adding wallet to add book with public key: '+ res);
+          this.toAddressBook(res).then((resp) => {
+	     console.log('Added wallet to address book: '+ resp.name);
+		  return resolve(wallet.name);
 	  }).catch((err) => {
 	      return reject(err);
 	  });
@@ -58,14 +58,15 @@ static toFile(wallet){
 	   console.log('Wallet saved to file'+ fileDat);
 	});
         console.log('Added wallet to file: '+ wallet.name);
-	return resolve(filePath);
+	return resolve(wallet.publicKey);
 	});
 }
 static toAddressBook(address){
 	return new Promise((resolve, reject) => {
-	let walPayId = acui_main.genPaymentId;
+	let walPayId = acui_main.genPaymentId(true);
+	console.log('walPayId: '+walPayId);
 	acui_main.addAddressBookEntry('devj',address,walPayId, 0).then((res) => {
-          console.log('Wallet added to addbook: '+ res);
+          console.log('Wallet added to addbook: '+ res.data);
 		return resolve(res);
 	}).catch((err) => {
 		console.log(err);

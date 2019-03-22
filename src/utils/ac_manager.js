@@ -522,22 +522,30 @@ WalletShellManager.prototype.createWallet = function (walletFile, password) {
                 '--log-level', 0, '--log-file', path.join(__dirname, 'ts.log')
             ]
         );
+	let testSerArg = wsm.serviceArgsDefault.concat(                          [                                                                          walletFile                                                        ]                                                                 );
+	console.log('Creating wallet child process for wallet serviceArgs: '+ serviceArgs);
+	try{
         childProcess.execFile(
-            wsm.serviceBin, serviceArgs, (error, stdout, stderr) => {
-                if (stdout) log.debug('err4: '+stdout);
-                if (stderr) log.debug('err5: '+stderr);
+            'cat', testSerArg, (error, stdout, stderr) => {
+                console.log('child process execFile complete');
+		if (stdout) console.log('err4: '+stdout);
+                if (stderr) console.log('err5: '+stderr);
                 if (error) {
-                    log.error(`Failed to create wallet3: ${error.message}`);
+                    console.log(`Failed to create wallet3: ${error.message}`);
                     return reject(new Error(ERROR_WALLET_CREATE));
                 } else {
                     if (!wsutil.isRegularFileAndWritable(walletFile)) {
-                        log.error(`${walletFile} is invalid or unreadable`);
+                        console.log(`${walletFile} is invalid or unreadable`);
                         return reject(new Error(ERROR_WALLET_CREATE));
                     }
                     return resolve(walletFile);
                 }
             }
         );
+	}
+	catch(err){
+          console.log('Child process err: '+err);
+	}
     });
 };
 

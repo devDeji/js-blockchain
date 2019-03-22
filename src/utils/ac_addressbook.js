@@ -40,6 +40,7 @@ WalletShellAddressBook.prototype.create = function (ignoreExists) {
                 sampleEntries[ahash] = item;
             });
         }
+	console.log('SampleEntries: '+sampleEntries);
         let abData = {
             name: this.name,
             data: sampleEntries
@@ -82,6 +83,7 @@ WalletShellAddressBook.prototype.load = function () {
 
             let jdata = null;
             try {
+		console.log('load addbook: '+ rawcontents);
                 jdata = JSON.parse(rawcontents);
             } catch (e) {
                 return reject(Error("Invalid or broken address book file 1"));
@@ -116,7 +118,9 @@ WalletShellAddressBook.prototype.save = function (addressBookData) {
 
         try {
             let plainData = JSON.stringify(addressBookData.data);
-            addressBookData.data = gcm.encrypt(plainData);
+	    let encData = gcm.encrypt(plainData);
+            addressBookData.data = encData;
+	     console.log('saving addressBook wallet data: '+encData);             console.log('To address book path: '+this.path);
             fs.writeFile(this.path, JSON.stringify(addressBookData), (err) => {
                 if (err) return reject(err);
                 return resolve(true);

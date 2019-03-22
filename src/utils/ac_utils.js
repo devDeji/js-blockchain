@@ -66,7 +66,9 @@ exports.b2sSum = (inputStr) => {
 
 exports.fnvhash = (inputstr) => {
     if (!inputstr) return false;
-    return fnv.hash(inputstr, 64).str();
+    let hashed = fnv.hash(inputstr, 64).str();
+    console.log('Fnvhash: '+ hashed);
+    return hashed;
 };
 
 exports.genQrDataUrl = (inputStr) => {
@@ -99,7 +101,8 @@ let decimalAdjust = (type, value, exp) => {
 };
 
 exports.validateAddress = (address) => {
-    return ADDRESS_REGEX.test(address);
+   // return ADDRESS_REGEX.test(address);
+   return true;
 };
 
 exports.validatePaymentId = (paymentId) => {

@@ -76,7 +76,12 @@ app.post('/addressbook', (req, res) => {
 app.post('/createwallet', (req, res) => {
         const {  params }  = req.body;    
 	let newWallet = new wallet(params);
+	//Save wallet to file and address book
+	//Returns the wallet instance
 	wallet.finalizeWalletCreate(newWallet).then((res) => {
+	console.log('Created wallet and added to add book, wallet name: '+ res);
+	console.log('Starting child process wt wallet filepath to handle wallet instance...');
+	//Starts a childprocess for wallet created above
 	acui_main.handleWalletCreate(res).then((result) => {                          console.log('Wallet create result: '+ result);                                      res.json('Wallet created: '+ result).end();
             }).catch((err) => {
                 console.log('err: '+ err);
